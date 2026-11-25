@@ -48,4 +48,7 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-runtime-compose:2.8.2")
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1")
+    
+    // Certificate generation ke liye
+    implementation("org.bouncycastle:bcprov-jdk15on:1.70")
 }
