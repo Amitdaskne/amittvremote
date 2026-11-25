@@ -48,7 +48,8 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-runtime-compose:2.8.2")
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1")
-    
-    // Certificate generation ke liye
-    implementation("org.bouncycastle:bcprov-jdk15on:1.70")
+
+    // 🔥 Fix: bcprov ke saath bcpkix bhi zaroori hai
+    implementation("org.bouncycastle:bcprov-jdk18on:1.78.1")
+    implementation("org.bouncycastle:bcpkix-jdk18on:1.78.1")
 }
