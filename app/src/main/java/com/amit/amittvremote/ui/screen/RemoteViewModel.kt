@@ -27,6 +27,7 @@ class RemoteViewModel(app: Application) : AndroidViewModel(app) {
     private var pairingClient: TvPairingClient? = null
     private var commandClient: TvCommandClient? = null
     private var discoveryJob: Job? = null
+    private var currentIp: String = ""
 
     private val _state = MutableStateFlow<ConnectionState>(ConnectionState.Idle)
     val state: StateFlow<ConnectionState> = _state.asStateFlow()
@@ -45,14 +46,14 @@ class RemoteViewModel(app: Application) : AndroidViewModel(app) {
     }
 
     fun startPairing(ip: String) {
+        currentIp = ip
         viewModelScope.launch {
             _state.value = ConnectionState.Pairing
             pairingClient = TvPairingClient(ip)
-            val connected = pairingClient?.connectAndRequestPairing() ?: false
-            if (!connected) {
-                _state.value = ConnectionState.Error("Failed to send pairing request")
+            val ok = pairingClient?.connectAndRequestPairing() ?: false
+            if (!ok) {
+                _state.value = ConnectionState.Error("Failed to send pairing request. Check TV remote service version.")
             }
-            // Now UI waits for user to enter code
         }
     }
 
@@ -60,13 +61,11 @@ class RemoteViewModel(app: Application) : AndroidViewModel(app) {
         viewModelScope.launch {
             val success = pairingClient?.submitPairingCode(code) ?: false
             if (success) {
-                // Connect command client
-                val ip = pairingClient?.let { /* extract ip */ "" } ?: ""
-                commandClient = TvCommandClient(ip)
+                commandClient = TvCommandClient(currentIp)
                 if (commandClient?.connect() == true) {
                     _state.value = ConnectionState.Connected
                 } else {
-                    _state.value = ConnectionState.Error("Paired but command connection failed")
+                    _state.value = ConnectionState.Error("Paired, but command connection failed")
                 }
             } else {
                 _state.value = ConnectionState.Error("Invalid pairing code")
